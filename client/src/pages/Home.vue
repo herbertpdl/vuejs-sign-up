@@ -21,13 +21,11 @@ export default {
 </script>
 
 <style lang="scss">
-
-.home-page {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
+  .home-page {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 </style>
