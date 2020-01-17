@@ -7,7 +7,6 @@ import store from './store/store'
 import './plugins/buefy'
 import './plugins/vue-the-mask'
 
-
 Vue.config.productionTip = false
 
 new Vue({
