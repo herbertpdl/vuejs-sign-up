@@ -4,22 +4,7 @@
       <div class="container">
         <div class="columns">
           <div class="column is-4">
-            <b-field>
-              <b-upload
-                v-model="image"
-                @input="imageToBase64"
-                accept="image/*"
-              >
-                <div v-if="image === null" class="sign-up__image-upload">
-                  <i class="ri-user-3-line" />
-                  <p>Adicionar uma foto</p>
-                </div>
-
-                <div v-else class="sign-up__image-upload done">
-                  <img :src="base64Image" />
-                </div>
-              </b-upload>
-            </b-field>
+            <image-uploader v-model="image" :userImage="image" />
           </div>
           <div class="column is-8">
             <div class="sign-up__register-form">
@@ -61,6 +46,7 @@
                 <div class="column is-10">
                   <b-field label="Idade">
                     <b-slider
+                      v-model="age"
                       rounded
                       aria-label="Fan"
                       size="is-medium"
@@ -209,7 +195,7 @@
               <!-- Interests -->
               <div class="columns">
                 <div class="column is-7">
-                  <tag-input v-model="interests" ref="tags" />
+                  <tag-input v-model="interests" ref="tags" :interests="interests" />
                 </div>
               </div>
 
@@ -243,8 +229,8 @@
 <script>
 import { mask } from 'vue-the-mask'
 
-import { ValidationObserver } from 'vee-validate';
 import TagInput from '../components/tag-input/TagInput'
+import ImageUploader from '../components/image-uploader/ImageUploader'
 
 import { getStates, getCities } from '../services/brasil'
 
@@ -254,8 +240,8 @@ export default {
     mask,
   },
   components: {
-    ValidationObserver,
     TagInput,
+    ImageUploader,
   },
   data() {
     return {
@@ -263,7 +249,6 @@ export default {
       citiesList: [],
       addressType: 'casa',
       image: null,
-      base64Image: null,
       name: '',
       lastName: null,
       age: null,
@@ -299,6 +284,10 @@ export default {
   },
   mounted() {
     getStates().then(resp => this.statesList = resp)
+
+    if (this.$store.state.userData.firstName !== undefined) {
+      this.setUserData()
+    }
   },
   computed: {
     adressPlaceholder() {
@@ -308,14 +297,6 @@ export default {
     },
   },
   methods: {
-    imageToBase64() {
-      // Convert image to base64
-      var reader = new FileReader()
-      reader.readAsDataURL(this.image)
-      reader.onload = () => {
-        this.base64Image = reader.result       
-      }
-    },
     validateName() {
       // Validate first name field using regex
       const regex = /^[a-zA-Z.]{0,20}$/
@@ -330,18 +311,53 @@ export default {
     },
     validateBeforeSubmit() {
       // Validate all fields before submit
-      // TODO: Use validation with a library instead manually
+      // TODO: Use validation with a library, instead manually, 
       // for better code organization
 
-      this.validateName()
-      this.$refs.firstName.checkHtml5Validity()
-      this.$refs.lastName.checkHtml5Validity()
-      this.$refs.email.checkHtml5Validity()
-      this.$refs.phone.checkHtml5Validity()
-      this.$refs.state.checkHtml5Validity()
-      this.$refs.city.checkHtml5Validity()
-      this.$refs.address.checkHtml5Validity()
-      this.$refs.tags.validate()
+      const validation = [
+        this.validateName(),
+        this.$refs.firstName.checkHtml5Validity(),
+        this.$refs.lastName.checkHtml5Validity(),
+        this.$refs.email.checkHtml5Validity(),
+        this.$refs.phone.checkHtml5Validity(),
+        this.$refs.state.checkHtml5Validity(),
+        this.$refs.city.checkHtml5Validity(),
+        this.$refs.address.checkHtml5Validity(),
+        this.$refs.tags.validate(),
+      ]
+      
+      if (!validation.includes(false)) {
+        // Push data to store
+        this.$store.commit('userData', {
+          image: this.image,
+          firstName: this.name,
+          lastName: this.lastName,
+          age: this.age,
+          email: this.email,
+          phone: this.phone,
+          state: this.state,
+          city: this.city,
+          address: this.address,
+          interests: this.interests,
+          wantsNewsletter: this.wantsNewsletter,
+        })
+
+        // Go to confirmation page
+        this.$router.push('/confirm')
+      }
+    },
+    setUserData() {
+      this.image = this.$store.state.userData.image
+      this.name = this.$store.state.userData.firstName
+      this.lastName = this.$store.state.userData.lastName
+      this.age = this.$store.state.userData.age
+      this.email = this.$store.state.userData.email
+      this.phone = this.$store.state.userData.phone
+      this.state = this.$store.state.userData.state
+      this.city = this.$store.state.userData.city
+      this.address = this.$store.state.userData.address
+      this.interests = this.$store.state.userData.interests
+      this.wantsNewsletter = this.$store.state.userData.wantsNewsletter
     }
   }
 }
@@ -349,43 +365,6 @@ export default {
 
 <style lang="scss">
   .sign-up {
-
-    .upload.control {
-      width: 100%;
-    }
-
-    &__image-upload {
-      display: block;
-      width: 200px;
-      height: 200px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      margin: 0 auto;
-      background-color: #cccccc;
-      border-radius: 100px;
-      overflow: hidden;
-      cursor: pointer;
-
-      &.done {
-        img {
-          min-width: 100%;
-          min-height: 100%;
-        }
-      }
-
-      i {
-        font-size: 50px;
-      }
-
-      &:hover {
-        p {
-          text-decoration: underline;
-        }
-      }
-    }
-
     &__register-form {
       padding: 20px 50px;
       border: 1px solid #808080;

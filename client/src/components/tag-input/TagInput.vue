@@ -28,6 +28,9 @@
 <script>
 export default {
   name: 'tag-input',
+  props: {
+    interests: Array
+  },
   data() {
     return {
       text: null,
@@ -36,10 +39,21 @@ export default {
       showNameValidationMessage: false,
     }
   },
+  watch: {
+    tags() {
+      this.validate()
+    }
+  },
+  mounted() {
+    if(this.interests) {
+      this.text = this.interests.toString()
+      this.handleTags()
+    }
+  },
   methods: {
     handleTags(event) {
       // Add a new tag whenever user press ","
-      if (event.key === ',') {
+      if ( (event && event.key === ',') || this.interests) {
         const arrayValues = this.text.split(',')
         this.tags = arrayValues.filter(val => val.trim() !== '')
         this.$emit('input', this.tags)

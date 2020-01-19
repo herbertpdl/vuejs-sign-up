@@ -4,6 +4,7 @@ import store from '../store/store'
 
 import Home from '../pages/Home'
 import SignUp from '../pages/SignUp'
+import Confirm from '../pages/Confirm'
 
 Vue.use(Router)
 
@@ -19,6 +20,11 @@ let router = new Router ({
       name: 'sign-up',
       component: SignUp,
     },
+    {
+      path: '/confirm',
+      name: 'confirm',
+      component: Confirm
+    }
   ]
 })
 
