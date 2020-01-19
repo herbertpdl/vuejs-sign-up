@@ -33,7 +33,7 @@ export default {
   },
   data() {
     return {
-      text: null,
+      text: '',
       tags: [],
       inputClass: null,
       showNameValidationMessage: false,
@@ -42,21 +42,28 @@ export default {
   watch: {
     tags() {
       this.validate()
+    },
+    interests() {
+      this.handleTags()
     }
   },
   mounted() {
-    if(this.interests) {
-      this.text = this.interests.toString()
+    if (this.interests.length > 0) {
+      console.log(this.interests)
       this.handleTags()
     }
   },
   methods: {
     handleTags(event) {
       // Add a new tag whenever user press ","
-      if ( (event && event.key === ',') || this.interests) {
+      if ( event && event.key === ',') {
         const arrayValues = this.text.split(',')
         this.tags = arrayValues.filter(val => val.trim() !== '')
         this.$emit('input', this.tags)
+      } else if (this.interests.length > 0 && this.interests !== this.tags) {
+        this.text = this.interests.toString()
+        const arrayValues = this.text.split(',')
+        this.tags = arrayValues.filter(val => val.trim() !== '')
       }
     },
     removeTag(index) {
